@@ -17,7 +17,10 @@ const crypto     = require('crypto');
 const bcrypt     = require('bcryptjs');
 const jwt        = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
+const { OAuth2Client } = require('google-auth-library');
 const User       = require('../models/User');
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // ─── Constants ────────────────────────────────────────────────────────────
 const BCRYPT_ROUNDS      = 12;
@@ -223,4 +226,50 @@ const verifyEmail = async (token) => {
   return user;
 };
 
-module.exports = { registerUser, loginUser, verifyEmail };
+/**
+ * Authenticate or register a user with a Google ID token.
+ *
+ * @param {{ credential, role }} params
+ * @returns {{ user, token }}
+ */
+const googleAuth = async ({ credential, role }) => {
+  let payload;
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    payload = ticket.getPayload();
+  } catch (error) {
+    const err = new Error(error.message || 'Invalid Google credential');
+    err.statusCode = 401;
+    throw err;
+  }
+
+  if (!payload || !payload.email_verified) {
+    const err = new Error('Google account email is not verified');
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const email = payload.email.toLowerCase();
+  let user = await User.findOne({ email });
+
+  if (user) {
+    const token = generateToken(user);
+    return { user, token };
+  }
+
+  user = await User.create({
+    name: payload.name || email.split('@')[0],
+    email,
+    role: role || 'seeker',
+    authProvider: 'google',
+    emailVerified: true,
+  });
+
+  const token = generateToken(user);
+  return { user, token };
+};
+
+module.exports = { registerUser, loginUser, verifyEmail, googleAuth };

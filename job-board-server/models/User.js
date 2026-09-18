@@ -37,8 +37,16 @@ const userSchema = new mongoose.Schema(
 
     passwordHash: {
       type: String,
-      required: true,
+      required: function () {
+        return this.authProvider === 'local';
+      },
       select: false, // never included in query results by default
+    },
+
+    authProvider: {
+      type: String,
+      enum: ['local', 'google'],
+      default: 'local',
     },
 
     role: {

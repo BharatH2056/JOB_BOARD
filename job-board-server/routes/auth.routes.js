@@ -93,6 +93,33 @@ router.post(
   })
 );
 
+// ─── POST /api/auth/google ────────────────────────────────────────────────
+/**
+ * Body: { credential, role }
+ * Returns: { success, token, user }
+ */
+router.post(
+  '/google',
+  asyncHandler(async (req, res) => {
+    const { credential, role } = req.body;
+
+    if (!credential) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'credential is required' });
+    }
+
+    const { user, token } = await authService.googleAuth({ credential, role });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Google authentication successful',
+      token,
+      user,
+    });
+  })
+);
+
 // ─── POST /api/auth/verify-email ──────────────────────────────────────────
 /**
  * Body OR query: { token }

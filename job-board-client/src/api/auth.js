@@ -14,3 +14,9 @@ export const verifyEmail = async (token) => {
   const res = await api.post('/auth/verify-email', { token });
   return res.data;
 };
+
+export const googleAuth = async ({ credential, role }) => {
+  const res = await api.post('/auth/google', { credential, role });
+  return res.data;
+};
+

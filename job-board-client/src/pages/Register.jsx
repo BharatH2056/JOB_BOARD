@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { Button } from '../components/ui/Button';
+import { GoogleSignInButton } from '../components/ui/GoogleSignInButton';
 import { User, Mail, Lock, Building, GraduationCap, ArrowRight } from 'lucide-react';
 
 export const Register = () => {
@@ -14,9 +15,19 @@ export const Register = () => {
   const [errorMsg, setErrorMsg] = useState('');
   const [registeredEmployerNotice, setRegisteredEmployerNotice] = useState(false);
 
-  const { register } = useAuth();
+  const { register, setAuthSession } = useAuth();
   const { success } = useToast();
   const navigate = useNavigate();
+
+  const handleGoogleSuccess = (data) => {
+    setAuthSession({ token: data.token, user: data.user });
+    success('Account created successfully!');
+    navigate(data.user?.role === 'employer' ? '/employer/dashboard' : '/jobs', { replace: true });
+  };
+
+  const handleGoogleError = (err) => {
+    setErrorMsg(err.response?.data?.message || 'Google registration failed. Please try again.');
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -262,6 +273,29 @@ export const Register = () => {
             <ArrowRight size={16} />
           </Button>
         </form>
+
+        {/* Divider */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            margin: 'var(--space-6) 0',
+            color: 'var(--text-muted)',
+            fontSize: 'var(--text-xs)',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border)' }} />
+          <span style={{ padding: '0 12px' }}>or continue with</span>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border)' }} />
+        </div>
+
+        <GoogleSignInButton
+          role={role}
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleError}
+        />
 
         <div style={{ textAlign: 'center', marginTop: 'var(--space-6)', fontSize: 'var(--text-sm)', color: 'var(--text-muted)' }}>
           Already have an account?{' '}

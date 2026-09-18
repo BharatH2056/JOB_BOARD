@@ -59,6 +59,15 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };
 
+  const setAuthSession = ({ token, user }) => {
+    if (token && user) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+      setToken(token);
+      setUser(user);
+    }
+  };
+
   const isAuthenticated = !!token && !!user;
   const isSeeker = user?.role === 'seeker';
   const isEmployer = user?.role === 'employer';
@@ -74,6 +83,7 @@ export const AuthProvider = ({ children }) => {
         register,
         logout,
         updateUser,
+        setAuthSession,
         isAuthenticated,
         isSeeker,
         isEmployer,
