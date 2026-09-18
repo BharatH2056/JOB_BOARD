@@ -1,0 +1,31 @@
+$kind: http-request
+name: Register Employer
+method: POST
+url: '{{baseUrl}}/api/auth/register'
+order: 1000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "name": "Test Employer",
+      "email": "{{employerEmail}}",
+      "password": "{{employerPassword}}",
+      "role": "employer"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Employer registered", () => pm.response.to.have.status(201));
+
+      if (pm.response.code === 201) {
+        const json = pm.response.json();
+        if (json.token) {
+          pm.collectionVariables.set("authToken", json.token);
+        }
+      }
+
+      console.log("ACTION REQUIRED: Check the server console for the email verification link/token, then set the 'emailVerifyToken' collection variable before running Request 2.");

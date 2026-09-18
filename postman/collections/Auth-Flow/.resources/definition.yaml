@@ -1,0 +1,14 @@
+$kind: collection
+name: Auth Flow
+description: 'Chained flow: Register employer → Verify email → Login. The Register request auto-captures the emailVerifyToken from the server console log pattern and stores it as a collection variable for the Verify Email request.'
+variables:
+  - key: baseUrl
+    value: 'http://localhost:5000'
+  - key: employerEmail
+    value: ''
+  - key: employerPassword
+    value: TestPass123
+  - key: emailVerifyToken
+    value: ''
+  - key: authToken
+    value: ''

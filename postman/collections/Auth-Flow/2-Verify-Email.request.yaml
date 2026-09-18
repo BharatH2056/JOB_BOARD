@@ -1,0 +1,17 @@
+$kind: http-request
+name: Verify Email
+method: GET
+url: '{{baseUrl}}/api/auth/verify-email?token={{emailVerifyToken}}'
+order: 2000
+queryParams:
+  - key: token
+    value: '{{emailVerifyToken}}'
+scripts:
+  - type: beforeRequest
+    language: text/javascript
+    code: |-
+      console.log('Using token:', pm.collectionVariables.get('emailVerifyToken'));
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Email verified", () => pm.response.to.have.status(200));

@@ -1,0 +1,27 @@
+$kind: http-request
+name: Login
+method: POST
+url: '{{baseUrl}}/api/auth/login'
+order: 3000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "email": "{{employerEmail}}",
+      "password": "{{employerPassword}}"
+    }
+scripts:
+  - type: afterResponse
+    language: text/javascript
+    code: |-
+      pm.test("Login successful", () => pm.response.to.have.status(200));
+
+      if (pm.response.code === 200) {
+        const json = pm.response.json();
+        if (json.token) {
+          pm.collectionVariables.set("authToken", json.token);
+        }
+      }
